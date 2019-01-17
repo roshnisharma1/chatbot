@@ -2,6 +2,14 @@ Description: This program creates a functioning chatbot by using PircBot, the mo
 
 IDE used: Eclipse
 
+Before you run this program, you must:
+  - Download PircBot 1.5.0 from http://www.jibble.org/pircbot.php
+  - Download Gson 2.6.2 from https://search.maven.org/artifact/com.google.code.gson/gson/2.6.2/jar
+  - Add both these external archives (.jar files) to project's build path
+  - Obtain an access token to send web requests to Twitter. Information & instructions on how to do this at https://developer.twitter.com/en/docs/basics/authentication/guides/access-tokens.html
+  - Sign up for OpenWeatherMap to obtain API key to make REST calls at https://home.openweathermap.org/users/sign_up
+  - More information about how to use OpenWeatherMap API at https://openweathermap.org/appid#get
+
 IRC used: PircBot 1.5.0
 
 Chat server used: FreeNode
@@ -12,7 +20,3 @@ External libraries used: org.jibble.pircbot.*, com.google.gson.JsonArray, com.go
 
 Files included: my-bot, my-bot-main
 
-Before you run this program, you must:
-  - Download PircBot 1.5.0 from http://www.jibble.org/pircbot.php
-  - Download Gson 2.6.2 from https://search.maven.org/artifact/com.google.code.gson/gson/2.6.2/jar
-  - Add both external archives (.jar files) to project's build path
