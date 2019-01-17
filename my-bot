@@ -1,0 +1,358 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.DecimalFormat;
+import org.jibble.pircbot.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+
+public class MyBot extends PircBot {
+	public MyBot() {
+		this.setName("Roshnibot");
+	}
+	
+	public void onMessage(String channel, String sender, String login, String hostname, String message) {
+		if (message.contains("time")) {
+			String time = new java.util.Date().toString();
+			sendMessage(channel, sender + ": The time is now " + time);
+		}
+		
+		if(message.contains("weather")) {
+			String city = message.split(" ")[1];
+			
+			double d = get_WindGust(city);
+			
+			double t = get_Temp(city);
+			double f = getFahr(t);
+			double lo = get_Lo(city);
+			double hi = get_Hi(city);
+			double lo_f = getFahr(lo);
+			double hi_f = getFahr(hi);
+			
+			double h = get_Humidity(city);
+			
+			String descr = get_Description(city);
+			
+			DecimalFormat two = new DecimalFormat("#0.00");
+
+			sendMessage(channel, sender + ": Today, the weather in " + city + " is " + descr + ". The temperature"
+					+ " is " + two.format(f) + " degrees" + " with a low of " + two.format(lo_f) 
+					+ " and a high of " + two.format(hi_f) + ", " + h + " percent humidity and " + d
+					+ " mph wind gust.");
+		}
+		
+		if(message.contains("twitter")) {
+			String s = get_Trends();
+			sendMessage(channel, sender + ": Current global trending topics on Twitter: " + s);
+		}
+	}
+	
+	
+	
+	/***************************************
+	********* TWITTER PORTION *************/
+	 
+	
+	static String get_Trends() {
+		String twitterURL = "https://api.twitter.com/1.1/trends/place.json?id=1";
+		StringBuilder result = new StringBuilder();
+		
+		try {
+			String bearerToken = "AAAAAAAAAAAAAAAAAAAAAHrl5gAAAAAASxDS6%2B0DST2DrdZl6nyP4lM%2F23M%3DFFqYw7wWh2KZ4HHexhdgtUBLhROXUIhiF5jhy6vGRI35HPkv53";
+			URL url = new URL(twitterURL);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestProperty("Authorization", "Bearer " + bearerToken);
+			
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			
+			while ((line = rd.readLine()) != null) {
+	    		result.append(line);
+	    	}
+			
+			rd.close();
+			
+		}
+		
+		catch(Exception e) {
+			System.out.println("Error: " + e);
+		}
+		
+		String trending_topics = parseJson_Trends(result.toString());
+		return trending_topics;
+	}
+	
+	static String parseJson_Trends(String json) {
+		JsonArray rootArray = new JsonParser().parse(json).getAsJsonArray();
+		JsonElement jelement = rootArray.get(0);
+		JsonObject MasterTwitterObject = jelement.getAsJsonObject();
+		
+		JsonArray trendArray = MasterTwitterObject.getAsJsonArray("trends");
+		
+		final String[] trends = new String[trendArray.size()];
+		StringBuilder topics = new StringBuilder();
+		
+		for (int i = 0; i < trends.length; i++) {
+			JsonElement unit = trendArray.get(i);
+			JsonObject unit_obj = unit.getAsJsonObject();
+			trends[i] = unit_obj.get("name").getAsString();
+			topics.append(trends[i] + ", ");
+		}
+		
+		return topics.toString();
+	}
+	
+	
+	/*******************************************
+	************ WEATHER GETTER METHODS *******/
+	
+	static double get_WindGust(String city) {
+		String key = "df91857bc78a0d544531f50c68a560e4";
+		String weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=" + key;
+		StringBuilder result = new StringBuilder();
+		
+		try {
+			URL url = new URL(weatherURL);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			
+			while ((line = rd.readLine()) != null) {
+	    		result.append(line);
+	    	}
+			
+			rd.close();
+			
+			double windGust = parseJson_WindGust(result.toString());
+			return windGust;
+		    //return result.toString();
+		}
+		
+		catch(Exception e) {
+			System.out.println("Error: " + e);
+			return 0;
+		}
+	}
+	
+	static double get_Temp(String city) {
+		String key = "df91857bc78a0d544531f50c68a560e4";
+		String weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=" + key;
+		StringBuilder result = new StringBuilder();
+		
+		try {
+			URL url = new URL(weatherURL);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			
+			while ((line = rd.readLine()) != null) {
+	    		result.append(line);
+	    	}
+			
+			rd.close();
+			
+			double temp = parseJson_Temperature(result.toString());
+			return temp;
+		}
+		
+		catch(Exception e) {
+			System.out.println("Error: " + e);
+			return 0;
+		}
+	}
+	
+	static double get_Lo(String city) {
+		String key = "df91857bc78a0d544531f50c68a560e4";
+		String weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=" + key;
+		StringBuilder result = new StringBuilder();
+		
+		try {
+			URL url = new URL(weatherURL);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			
+			while ((line = rd.readLine()) != null) {
+	    		result.append(line);
+	    	}
+			
+			rd.close();
+			
+			double min = parseJson_Lo(result.toString());
+			return min;
+		}
+		
+		catch(Exception e) {
+			System.out.println("Error: " + e);
+			return 0;
+		}
+	}
+	
+	static double get_Hi(String city) {
+		String key = "df91857bc78a0d544531f50c68a560e4";
+		String weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=" + key;
+		StringBuilder result = new StringBuilder();
+		
+		try {
+			URL url = new URL(weatherURL);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			
+			while ((line = rd.readLine()) != null) {
+	    		result.append(line);
+	    	}
+			
+			rd.close();
+			
+			double high = parseJson_Hi(result.toString());
+			return high;
+		}
+		
+		catch(Exception e) {
+			System.out.println("Error: " + e);
+			return 0;
+		}
+	}
+	
+	static double get_Humidity(String city) {
+		String key = "df91857bc78a0d544531f50c68a560e4";
+		String weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=" + key;
+		StringBuilder result = new StringBuilder();
+		
+		try {
+			URL url = new URL(weatherURL);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			
+			while ((line = rd.readLine()) != null) {
+	    		result.append(line);
+	    	}
+			
+			rd.close();
+			
+			double humid = parseJson_Humidity(result.toString());
+			return humid;
+		}
+		
+		catch(Exception e) {
+			System.out.println("Error: " + e);
+			return 0;
+		}
+	}
+	
+	static String get_Description(String city) {
+		String key = "df91857bc78a0d544531f50c68a560e4";
+		String weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=" + key;
+		StringBuilder result = new StringBuilder();
+		
+		try {
+			URL url = new URL(weatherURL);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			
+			while ((line = rd.readLine()) != null) {
+	    		result.append(line);
+	    	}
+			
+			rd.close();
+			
+			String desc = parseJson_Description(result.toString());
+			return desc;
+		}
+		
+		catch(Exception e) {
+			System.out.println("Error: " + e);
+			return "";
+		}
+	}
+	
+	/***************************************
+	********* PARSING PORTION *************/
+	
+	
+	static double parseJson_WindGust(String json) {
+		JsonElement jelement = new JsonParser().parse(json);
+		JsonObject  MasterWeatherObject = jelement.getAsJsonObject();
+		
+		JsonObject windObject = MasterWeatherObject.getAsJsonObject("wind");
+		double gust = windObject.get("gust").getAsDouble();
+		
+		return gust;
+	}
+	
+	static double parseJson_Temperature(String json) {
+		JsonElement jelement = new JsonParser().parse(json);
+		JsonObject  MasterWeatherObject = jelement.getAsJsonObject();
+		
+		JsonObject tempObject = MasterWeatherObject.getAsJsonObject("main");
+		double temp = tempObject.get("temp").getAsDouble();
+		
+		return temp;
+		
+	}
+	
+	static double parseJson_Lo(String json) {
+		JsonElement jelement = new JsonParser().parse(json);
+		JsonObject  MasterWeatherObject = jelement.getAsJsonObject();
+		
+		JsonObject tempObject = MasterWeatherObject.getAsJsonObject("main");
+		double temp_lo = tempObject.get("temp_min").getAsDouble();
+		
+		return temp_lo;
+		
+	}
+	
+	static double parseJson_Hi(String json) {
+		JsonElement jelement = new JsonParser().parse(json);
+		JsonObject  MasterWeatherObject = jelement.getAsJsonObject();
+		
+		JsonObject tempObject = MasterWeatherObject.getAsJsonObject("main");
+		double temp_hi = tempObject.get("temp_max").getAsDouble();
+		
+		return temp_hi;
+		
+	}
+	
+	static double parseJson_Humidity(String json) {
+		JsonElement jelement = new JsonParser().parse(json);
+		JsonObject  MasterWeatherObject = jelement.getAsJsonObject();
+		
+		JsonObject humObject = MasterWeatherObject.getAsJsonObject("main");
+		double humidity = humObject.get("humidity").getAsDouble();
+		
+		return humidity;
+	}
+	
+	static String parseJson_Description(String json) {
+		JsonElement jelement = new JsonParser().parse(json);
+		JsonObject  MasterWeatherObject = jelement.getAsJsonObject();
+		
+		JsonArray weatherArray = MasterWeatherObject.getAsJsonArray("weather");
+		final String[] weather = new String[weatherArray.size()];
+		
+		for (int i = 0; i < weather.length; i++) {
+			JsonElement unit = weatherArray.get(i);
+			JsonObject unit_obj = unit.getAsJsonObject();
+			weather[i] = unit_obj.get("description").getAsString();
+		}
+		return weather[0];
+	}
+	
+	static double getFahr(double t) {
+		double f = (9 / 5) * (t - 273) + 32;
+		return f;
+	}
+}
