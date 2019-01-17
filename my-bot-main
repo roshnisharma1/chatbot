@@ -1,0 +1,22 @@
+import org.jibble.pircbot.*;
+
+public class MyBotMain {
+	public static void main(String[] args) throws Exception {
+		MyBot bot = new MyBot();
+		
+		bot.setVerbose(true);
+		
+		try {
+      // For this program I am using the FreeNode chat server
+			bot.connect("irc.freenode.net");
+		}
+		
+		catch (Exception e) {
+			System.out.println("Can't connect: " + e);
+			return;
+		}
+		
+    // Enter the name of the channel you wish to join on the chat server
+		bot.joinChannel("#roshni");
+	}
+}
